@@ -9,5 +9,7 @@ public class UserActivity
     public Article Article { get; set; } = null!;
     public int TimeSpentSeconds { get; set; }
     public int? Rating { get; set; }
+    public bool IsRecommendation { get; set; }
+    public int? RecommendationFeedback { get; set; }
     public DateTime ViewedAt { get; set; } = DateTime.UtcNow;
 }

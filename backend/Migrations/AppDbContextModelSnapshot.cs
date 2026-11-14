@@ -38,8 +38,19 @@ namespace SmartArticle.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("PublishedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ReadTimeMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -95,7 +106,13 @@ namespace SmartArticle.Api.Migrations
                     b.Property<int>("ArticleId")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsRecommendation")
+                        .HasColumnType("boolean");
+
                     b.Property<int?>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("RecommendationFeedback")
                         .HasColumnType("integer");
 
                     b.Property<int>("TimeSpentSeconds")
