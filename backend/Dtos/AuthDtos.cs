@@ -32,3 +32,20 @@ public class AuthResponse
     public string Email { get; set; } = string.Empty;
     public string Username { get; set; } = string.Empty;
 }
+
+public class UpdateProfileRequest
+{
+    [Required]
+    [MinLength(3)]
+    public string Username { get; set; } = string.Empty;
+}
+
+public class ChangePasswordRequest
+{
+    [Required]
+    public string CurrentPassword { get; set; } = string.Empty;
+
+    [Required]
+    [MinLength(6)]
+    public string NewPassword { get; set; } = string.Empty;
+}
