@@ -7,7 +7,7 @@ function Navbar({ user, activeTab, onSelectTab, onOpenProfile, onLogout }) {
     <header className="header">
       <div className="header-left">
         <div className="logo" onClick={() => onSelectTab('articles')}>
-          <span className="logo-icon">📰</span>
+          <div className="logo-badge">SA</div>
           <span className="logo-text">Smart Article</span>
         </div>
         <nav className="nav-links">
@@ -21,7 +21,7 @@ function Navbar({ user, activeTab, onSelectTab, onOpenProfile, onLogout }) {
             className={`nav-link ${activeTab === 'recommendations' ? 'active' : ''}`}
             onClick={() => onSelectTab('recommendations')}
           >
-            Dla Ciebie (ML)
+            Rekomendacje
           </button>
           <button
             className={`nav-link ${activeTab === 'history' ? 'active' : ''}`}
@@ -36,12 +36,12 @@ function Navbar({ user, activeTab, onSelectTab, onOpenProfile, onLogout }) {
         <button
           className={`avatar-btn ${activeTab === 'profile' ? 'active-avatar' : ''}`}
           onClick={onOpenProfile}
-          title="Szczegóły konta"
+          title="Profil i ustawienia konta"
         >
           <span className="avatar-circle">{initial}</span>
           <span className="avatar-name">{user.username}</span>
         </button>
-        <button onClick={onLogout} className="btn btn-secondary btn-sm">
+        <button onClick={onLogout} className="btn btn-outline btn-sm">
           Wyloguj
         </button>
       </div>

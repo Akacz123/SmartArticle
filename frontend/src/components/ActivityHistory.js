@@ -25,25 +25,30 @@ function ActivityHistory({ userId, onReadArticle }) {
   };
 
   const formatSeconds = (sec) => {
-    if (!sec) return '0 sek';
-    if (sec < 60) return `${sec} sek`;
+    if (!sec) return '0 s';
+    if (sec < 60) return `${sec} s`;
     const mins = Math.floor(sec / 60);
     const remSec = sec % 60;
-    return `${mins} min ${remSec > 0 ? remSec + ' sek' : ''}`;
+    return `${mins} min ${remSec > 0 ? remSec + ' s' : ''}`;
   };
 
   return (
     <div className="history-container">
       <div className="section-intro">
-        <h2>Twoja historia aktywności</h2>
-        <p>Przeglądaj artykuły, które czytałeś, czas poświęcony na lekturę oraz wystawione oceny.</p>
+        <h1 className="page-heading">Historia aktywności</h1>
+        <p className="page-subheading">
+          Zestawienie artykułów, czas spędzony na lekturze oraz wystawione oceny jakości i trafności rekomendacji.
+        </p>
       </div>
 
       {loading ? (
-        <div className="loading-state">Ładowanie historii...</div>
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <span>Ładowanie historii...</span>
+        </div>
       ) : activities.length === 0 ? (
         <div className="empty-state">
-          Brak historii czytania. Przejdź do zakładki Artykuły, aby rozpocząć!
+          Brak historii czytania. Przejdź do zakładki Artykuły, aby rozpocząć lekturę.
         </div>
       ) : (
         <div className="history-table-wrapper">
@@ -53,8 +58,8 @@ function ActivityHistory({ userId, onReadArticle }) {
                 <th>Artykuł</th>
                 <th>Kategoria</th>
                 <th>Czas czytania</th>
-                <th>Twoja ocena</th>
-                <th>Typ</th>
+                <th>Ocena</th>
+                <th>Źródło</th>
                 <th>Data</th>
                 <th>Akcja</th>
               </tr>
@@ -64,21 +69,21 @@ function ActivityHistory({ userId, onReadArticle }) {
                 <tr key={item.id}>
                   <td className="table-title">{item.articleTitle}</td>
                   <td>
-                    <span className="card-category">{item.category}</span>
+                    <span className="card-category-inline">{item.category}</span>
                   </td>
                   <td>{formatSeconds(item.timeSpentSeconds)}</td>
-                  <td>{item.rating ? `⭐ ${item.rating}/5` : '—'}</td>
+                  <td>{item.rating ? `${item.rating} / 5` : '—'}</td>
                   <td>
                     {item.isRecommendation ? (
-                      <span className="ml-badge-small">ML</span>
+                      <span className="ml-badge-small">Rekomendacja</span>
                     ) : (
-                      'Standard'
+                      <span className="badge-standard">Katalog</span>
                     )}
                   </td>
                   <td>{new Date(item.viewedAt).toLocaleDateString('pl-PL')}</td>
                   <td>
                     <button
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-outline btn-sm"
                       onClick={() => onReadArticle(item.articleId, item.isRecommendation)}
                     >
                       Otwórz

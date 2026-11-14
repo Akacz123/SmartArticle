@@ -9,6 +9,8 @@ function ArticleList({ onReadArticle }) {
   const [selectedCategory, setSelectedCategory] = useState('Wszystkie');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState('');
 
   useEffect(() => {
     fetchCategories();
@@ -51,13 +53,66 @@ function ArticleList({ onReadArticle }) {
     }
   };
 
+  const handleSyncExternal = async () => {
+    setSyncing(true);
+    setSyncMessage('');
+    try {
+      const res = await fetch(`${API}/articles/sync-external`, {
+        method: 'POST'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSyncMessage(`Pobrano ${data.added} nowych artykułów (łącznie w bazie: ${data.total}).`);
+        fetchArticles();
+        fetchCategories();
+      } else {
+        setSyncMessage('Nie udało się pobrać nowych artykułów.');
+      }
+    } catch {
+      setSyncMessage('Błąd połączenia z serwerem podczas synchronizacji.');
+    } finally {
+      setSyncing(false);
+      setTimeout(() => setSyncMessage(''), 4000);
+    }
+  };
+
   return (
     <div className="articles-container">
+      <div className="articles-header-bar">
+        <div>
+          <h1 className="page-heading">Baza wiedzy i artykułów</h1>
+          <p className="page-subheading">
+            Dostępnych artykułów: <strong>{articles.length}</strong>
+          </p>
+        </div>
+
+        <button
+          className="btn btn-secondary btn-sm sync-btn"
+          onClick={handleSyncExternal}
+          disabled={syncing}
+        >
+          <svg className={syncing ? 'spin-icon' : ''} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          {syncing ? 'Pobieranie z API...' : 'Pobierz nowe z sieci'}
+        </button>
+      </div>
+
+      {syncMessage && (
+        <div className="alert-box alert-info">{syncMessage}</div>
+      )}
+
       <div className="filter-bar">
         <div className="search-box">
+          <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
           <input
             type="text"
-            placeholder="Szukaj artykułów..."
+            placeholder="Szukaj artykułów według tytułu lub treści..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="search-input"
@@ -81,9 +136,14 @@ function ArticleList({ onReadArticle }) {
       </div>
 
       {loading ? (
-        <div className="loading-state">Ładowanie artykułów...</div>
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <span>Ładowanie bazy artykułów...</span>
+        </div>
       ) : articles.length === 0 ? (
-        <div className="empty-state">Brak artykułów dla wybranych kryteriów.</div>
+        <div className="empty-state">
+          Brak artykułów dla wybranych kryteriów wyszukiwania.
+        </div>
       ) : (
         <div className="articles-grid">
           {articles.map((article) => (

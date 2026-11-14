@@ -15,7 +15,7 @@ function RecommendationsView({ userId, onReadArticle }) {
   const fetchRecommendations = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/recommendations/${userId}?limit=6`);
+      const res = await fetch(`${API}/recommendations/${userId}?limit=9`);
       if (res.ok) {
         const data = await res.json();
         setRecommendations(data);
@@ -39,8 +39,8 @@ function RecommendationsView({ userId, onReadArticle }) {
       });
 
       if (res.ok) {
-        setFeedbackNotice(feedback === 1 ? 'Dziękujemy! Oznaczono jako trafną.' : 'Dziękujemy! Uwzględnimy to w kolejnych rekomendacjach.');
-        setTimeout(() => setFeedbackNotice(''), 3000);
+        setFeedbackNotice(feedback === 1 ? 'Dziękujemy za ocenę: Rekomendacja oznaczona jako trafna.' : 'Dziękujemy za ocenę: Rekomendacja oznaczona jako nietrafna.');
+        setTimeout(() => setFeedbackNotice(''), 3500);
       }
     } catch {
     }
@@ -49,22 +49,25 @@ function RecommendationsView({ userId, onReadArticle }) {
   return (
     <div className="recommendations-container">
       <div className="section-intro">
-        <h2>Rekomendacje personalizowane dla Ciebie</h2>
-        <p>
-          Model ML analizuje historię przeczytanych artykułów, spędzony czas czytania oraz oceny,
-          wykorzystując <strong>Collaborative Filtering</strong>, <strong>KNN</strong> oraz <strong>PCA</strong>.
+        <h1 className="page-heading">Rekomendacje personalizowane</h1>
+        <p className="page-subheading">
+          Model uczenia maszynowego analizuje Twoją historię czytania, czas spędzony na artykułach oraz oceny,
+          wykorzystując Collaborative Filtering, algorytm KNN oraz redukcję wymiarowości PCA.
         </p>
       </div>
 
       {feedbackNotice && (
-        <div className="feedback-toast">{feedbackNotice}</div>
+        <div className="alert-box alert-success">{feedbackNotice}</div>
       )}
 
       {loading ? (
-        <div className="loading-state">Obliczanie rekomendacji przez model ML...</div>
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <span>Obliczanie macierzy preferencji i generowanie rekomendacji...</span>
+        </div>
       ) : recommendations.length === 0 ? (
         <div className="empty-state">
-          Brak rekomendacji. Przeczytaj kilka artykułów, aby model poznał Twoje preferencje!
+          Brak dostępnych rekomendacji. Przeczytaj kilka artykułów z bazy, aby model mógł nauczyć się Twoich preferencji.
         </div>
       ) : (
         <div className="articles-grid">

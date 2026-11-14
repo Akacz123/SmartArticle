@@ -33,6 +33,14 @@ function App() {
     setReadingArticle(null);
   };
 
+  const handleUserUpdated = (updatedUser) => {
+    setUser((prev) => {
+      const merged = { ...prev, ...updatedUser };
+      localStorage.setItem('smartarticle_user', JSON.stringify(merged));
+      return merged;
+    });
+  };
+
   const handleLogout = () => {
     setUser(null);
     setAuthView('login');
@@ -65,7 +73,7 @@ function App() {
       <div className="auth-wrapper">
         <header className="auth-header">
           <div className="logo-center">
-            <span className="logo-icon-lg">📰</span>
+            <div className="auth-logo-badge">SA</div>
             <h1>Smart Article</h1>
             <p className="auth-subtitle">Inteligentny system rekomendacji artykułów</p>
           </div>
@@ -130,9 +138,10 @@ function App() {
 
         {activeTab === 'profile' && (
           <UserProfile
-            userId={user.id}
+            user={user}
             onBack={handleBackToArticles}
             onReadArticle={handleReadArticle}
+            onUserUpdated={handleUserUpdated}
           />
         )}
 
