@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import ArticleList from './components/ArticleList';
 import ArticleReader from './components/ArticleReader';
 import RecommendationsView from './components/RecommendationsView';
+import IntelligenceView from './components/IntelligenceView';
 import UserProfile from './components/UserProfile';
 import ActivityHistory from './components/ActivityHistory';
 import './App.css';
@@ -131,6 +132,13 @@ function App() {
 
         {activeTab === 'recommendations' && (
           <RecommendationsView
+            userId={user.id}
+            onReadArticle={handleReadArticle}
+          />
+        )}
+
+        {activeTab === 'intelligence' && (
+          <IntelligenceView
             userId={user.id}
             onReadArticle={handleReadArticle}
           />

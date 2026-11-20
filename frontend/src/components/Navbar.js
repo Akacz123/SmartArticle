@@ -24,6 +24,12 @@ function Navbar({ user, activeTab, onSelectTab, onOpenProfile, onLogout }) {
             Rekomendacje
           </button>
           <button
+            className={`nav-link ${activeTab === 'intelligence' ? 'active' : ''}`}
+            onClick={() => onSelectTab('intelligence')}
+          >
+            Predykcje i Analityka
+          </button>
+          <button
             className={`nav-link ${activeTab === 'history' ? 'active' : ''}`}
             onClick={() => onSelectTab('history')}
           >

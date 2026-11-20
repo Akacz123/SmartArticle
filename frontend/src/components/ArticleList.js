@@ -8,6 +8,10 @@ function ArticleList({ onReadArticle }) {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('Wszystkie');
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(12);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
@@ -18,7 +22,7 @@ function ArticleList({ onReadArticle }) {
 
   useEffect(() => {
     fetchArticles();
-  }, [selectedCategory, search]);
+  }, [selectedCategory, search, page]);
 
   const fetchCategories = async () => {
     try {
@@ -41,15 +45,36 @@ function ArticleList({ onReadArticle }) {
       if (search.trim()) {
         params.append('search', search.trim());
       }
+      params.append('page', page.toString());
+      params.append('pageSize', pageSize.toString());
 
       const res = await fetch(`${API}/articles?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
-        setArticles(data);
+        setArticles(data.items || []);
+        setTotalPages(data.totalPages || 1);
+        setTotalItems(data.totalItems || 0);
       }
     } catch {
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCategoryChange = (cat) => {
+    setSelectedCategory(cat);
+    setPage(1);
+  };
+
+  const handleSearchChange = (val) => {
+    setSearch(val);
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages && newPage !== page) {
+      setPage(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -62,7 +87,7 @@ function ArticleList({ onReadArticle }) {
       });
       if (res.ok) {
         const data = await res.json();
-        setSyncMessage(`Pobrano ${data.added} nowych artykułów (łącznie w bazie: ${data.total}).`);
+        setSyncMessage(`Zaktualizowano bazę. Dodano ${data.added} nowych artykułów (łącznie w repozytorium: ${data.total}).`);
         fetchArticles();
         fetchCategories();
       } else {
@@ -72,8 +97,55 @@ function ArticleList({ onReadArticle }) {
       setSyncMessage('Błąd połączenia z serwerem podczas synchronizacji.');
     } finally {
       setSyncing(false);
-      setTimeout(() => setSyncMessage(''), 4000);
+      setTimeout(() => setSyncMessage(''), 4500);
     }
+  };
+
+  const renderPaginationButtons = () => {
+    const buttons = [];
+    const maxButtons = 5;
+    let startPage = Math.max(1, page - Math.floor(maxButtons / 2));
+    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+
+    if (endPage - startPage + 1 < maxButtons) {
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    if (startPage > 1) {
+      buttons.push(
+        <button key={1} className="page-btn" onClick={() => handlePageChange(1)}>
+          1
+        </button>
+      );
+      if (startPage > 2) {
+        buttons.push(<span key="dots-start" className="page-dots">...</span>);
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <button
+          key={i}
+          className={`page-btn ${page === i ? 'page-active' : ''}`}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        buttons.push(<span key="dots-end" className="page-dots">...</span>);
+      }
+      buttons.push(
+        <button key={totalPages} className="page-btn" onClick={() => handlePageChange(totalPages)}>
+          {totalPages}
+        </button>
+      );
+    }
+
+    return buttons;
   };
 
   return (
@@ -82,7 +154,7 @@ function ArticleList({ onReadArticle }) {
         <div>
           <h1 className="page-heading">Baza wiedzy i artykułów</h1>
           <p className="page-subheading">
-            Dostępnych artykułów: <strong>{articles.length}</strong>
+            Dostępnych pozycji: <strong>{totalItems}</strong> {totalPages > 1 && `(Strona ${page} z ${totalPages})`}
           </p>
         </div>
 
@@ -112,13 +184,13 @@ function ArticleList({ onReadArticle }) {
           </svg>
           <input
             type="text"
-            placeholder="Szukaj artykułów według tytułu lub treści..."
+            placeholder="Szukaj artykułów według słów kluczowych..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="search-input"
           />
           {search && (
-            <button className="clear-search-btn" onClick={() => setSearch('')}>✕</button>
+            <button className="clear-search-btn" onClick={() => handleSearchChange('')}>✕</button>
           )}
         </div>
 
@@ -127,7 +199,7 @@ function ArticleList({ onReadArticle }) {
             <button
               key={cat}
               className={`chip ${selectedCategory === cat ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => handleCategoryChange(cat)}
             >
               {cat}
             </button>
@@ -145,15 +217,41 @@ function ArticleList({ onReadArticle }) {
           Brak artykułów dla wybranych kryteriów wyszukiwania.
         </div>
       ) : (
-        <div className="articles-grid">
-          {articles.map((article) => (
-            <ArticleCard
-              key={article.id}
-              article={article}
-              onRead={onReadArticle}
-            />
-          ))}
-        </div>
+        <>
+          <div className="articles-grid">
+            {articles.map((article) => (
+              <ArticleCard
+                key={article.id}
+                article={article}
+                onRead={onReadArticle}
+              />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="pagination-bar">
+              <button
+                className="page-nav-btn"
+                disabled={page <= 1}
+                onClick={() => handlePageChange(page - 1)}
+              >
+                ← Poprzednia
+              </button>
+
+              <div className="page-numbers">
+                {renderPaginationButtons()}
+              </div>
+
+              <button
+                className="page-nav-btn"
+                disabled={page >= totalPages}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                Następna →
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
